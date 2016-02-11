@@ -20,8 +20,14 @@ module AngularRailsTemplates
     end
 
     def evaluate(scope, locals, &block)
-      locals[:html] = escape_javascript data.chomp
+      locales = data.keys
       locals[:angular_template_name] = logical_template_path(scope)
+      locals[:html] = {}
+      locals[:angular_template_names] = {}
+      locales.each do |locale|
+        locals[:html][locale] = escape_javascript data[locale].chomp
+        locals[:angular_template_names][locale] = localized_logical_template_path(scope, locale)
+      end
       locals[:source_file] = "#{scope.pathname}".sub(/^#{Rails.root}\//,'')
       locals[:angular_module] = configuration.module_name
 
@@ -33,6 +39,11 @@ module AngularRailsTemplates
     end
 
     private
+
+    def localized_logical_template_path(scope, locale)
+      path = scope.logical_path.sub /^(#{configuration.ignore_prefix.join('|')})/, ''
+      "#{path}-#{locale}.html"
+    end
 
     def logical_template_path(scope)
       path = scope.logical_path.sub /^(#{configuration.ignore_prefix.join('|')})/, ''

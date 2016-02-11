@@ -7,6 +7,7 @@ module AngularRailsTemplates
     config.angular_templates.ignore_prefix  = ['templates/']
     config.angular_templates.inside_paths   = [] # defined in before_configuration
     config.angular_templates.markups        = []
+    config.angular_templates.localized_markups = ['slim']
     config.angular_templates.htmlcompressor = false
 
     config.before_configuration do |app|
@@ -43,10 +44,31 @@ module AngularRailsTemplates
           # Processed haml/slim templates have a mime-type of text/html.
           # If sprockets sees a `foo.html.haml` it will process the haml
           # and stop, because the haml output is html. Our html engine won't get run.
-          mimeless_engine = Class.new(Tilt[ext]) do
-            def self.default_mime_type
-              nil
+          if app.config.angular_templates.localized_markups.include?(ext)
+
+            mimeless_engine = Class.new(Tilt[ext]) do
+              def self.default_mime_type
+                nil
+              end
+
+              def evaluate(scope, locals, &block)
+                result = {}
+                I18n.available_locales.each do |loc|
+                  I18n.locale = loc
+                  result[loc] = super
+                end
+                result
+              end
             end
+
+          else
+
+            mimeless_engine = Class.new(Tilt[ext]) do
+              def self.default_mime_type
+                nil
+              end
+            end
+
           end
 
           app.assets.register_engine ".#{ext}", mimeless_engine

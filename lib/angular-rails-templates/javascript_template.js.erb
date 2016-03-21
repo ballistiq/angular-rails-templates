@@ -2,8 +2,8 @@
 // source: <%= source_file %>
 
 angular.module("<%= angular_module %>").run(["$templateCache", function($templateCache) {
-  $templateCache.put("<%= angular_template_name %>", <%= html.values.first %>)
   <% html.each do |key, val| %>
     $templateCache.put("<%= angular_template_names[key] %>", <%= val %>)
   <% end %>
+  $templateCache.put("<%= angular_template_name %>", $templateCache.get("<%= angular_template_names.stringify_keys['en'] %>"))
 }]);

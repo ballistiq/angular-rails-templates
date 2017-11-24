@@ -53,10 +53,12 @@ module AngularRailsTemplates
 
               def evaluate(scope, locals, &block)
                 result = {}
+                current_locale = I18n.locale
                 I18n.available_locales.each do |loc|
                   I18n.locale = loc
                   result[loc] = super
                 end
+                I18n.locale = current_locale
                 result
               end
             end
